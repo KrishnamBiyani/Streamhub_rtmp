@@ -1,12 +1,20 @@
 import { useEffect, useRef, useState } from "react";
+import { io } from "socket.io-client";
 
 export default function StreamPage() {
   const videoRef = useRef(null);
   const streamRef = useRef(null);
+  const socketRef = useRef(null);
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamKey, setStreamKey] = useState("");
 
   useEffect(() => {
+    socketRef.current = io("http://localhost:3000");
+
+    socketRef.current.on("connect", () => {
+      console.log("✅ Connected to server:", socketRef.current.id);
+    });
+
     // Request webcam + mic access
     async function getMedia() {
       try {
@@ -32,8 +40,23 @@ export default function StreamPage() {
 
   const handleStart = () => {
     setIsStreaming(true);
-    console.log("Start streaming to:", streamKey);
+    //console.log("Start streaming to:", streamKey);
     // TODO: Send stream to backend
+    const stream = streamRef.current;
+    const socket = socketRef.current;
+
+    const mediaRecorder = new MediaRecorder(stream, {
+      audioBitsPerSecond: 128000,
+      videoBitsPerSecond: 2500000,
+      mimeType: "video/webm;codecs=vp8,opus",
+    });
+
+    mediaRecorder.ondataavailable = (ev) => {
+      console.log("Binary stream available: ", ev.data);
+      socket.emit("binarystream", ev.data);
+    };
+
+    mediaRecorder.start(100);
   };
 
   const handleStop = () => {
