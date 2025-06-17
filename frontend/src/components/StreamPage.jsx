@@ -5,6 +5,8 @@ export default function StreamPage() {
   const videoRef = useRef(null);
   const streamRef = useRef(null);
   const socketRef = useRef(null);
+  const recorderRef = useRef(null);
+
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamKey, setStreamKey] = useState("");
 
@@ -15,7 +17,6 @@ export default function StreamPage() {
       console.log("✅ Connected to server:", socketRef.current.id);
     });
 
-    // Request webcam + mic access
     async function getMedia() {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
@@ -27,23 +28,23 @@ export default function StreamPage() {
           videoRef.current.srcObject = stream;
         }
       } catch (err) {
-        console.error("Failed to access camera/mic:", err);
+        console.error("❌ Failed to access camera/mic:", err);
       }
     }
 
     getMedia();
+
     return () => {
-      // Stop media tracks on unmount
       streamRef.current?.getTracks().forEach((track) => track.stop());
     };
   }, []);
 
   const handleStart = () => {
     setIsStreaming(true);
-    //console.log("Start streaming to:", streamKey);
-    // TODO: Send stream to backend
-    const stream = streamRef.current;
     const socket = socketRef.current;
+    const stream = streamRef.current;
+
+    socket.emit("start-stream", streamKey);
 
     const mediaRecorder = new MediaRecorder(stream, {
       audioBitsPerSecond: 128000,
@@ -51,8 +52,10 @@ export default function StreamPage() {
       mimeType: "video/webm;codecs=vp8,opus",
     });
 
+    recorderRef.current = mediaRecorder;
+
     mediaRecorder.ondataavailable = (ev) => {
-      console.log("Binary stream available: ", ev.data);
+      console.log("🔥 Binary stream available: ", ev.data);
       socket.emit("binarystream", ev.data);
     };
 
@@ -61,8 +64,16 @@ export default function StreamPage() {
 
   const handleStop = () => {
     setIsStreaming(false);
-    console.log("Stop streaming");
-    // TODO: Signal backend to stop FFmpeg
+    socketRef.current.emit("stop-stream");
+
+    // Stop the MediaRecorder
+    if (recorderRef.current && recorderRef.current.state !== "inactive") {
+      recorderRef.current.stop();
+      recorderRef.current = null;
+    }
+
+    // Stop media input (optional)
+    streamRef.current?.getTracks().forEach((track) => track.stop());
   };
 
   return (
