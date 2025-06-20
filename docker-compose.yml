@@ -10,3 +10,23 @@ services:
     ports:
       - "3000:3000"
     restart: unless-stopped
+    networks:
+      - streamhub-net
+
+  rtmp-server:
+    build:
+      context: ./rtmp_server
+      dockerfile: Dockerfile
+    container_name: rtmp-server
+    ports:
+      - "1935:1935"
+      - "8080:80"
+    volumes:
+      - ./hls-data:/opt/data/hls
+    restart: unless-stopped
+    networks:
+      - streamhub-net
+
+networks:
+  streamhub-net:
+    driver: bridge

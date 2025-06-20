@@ -18,7 +18,12 @@ io.on("connection", (socket) => {
 
   let ffmpegProcess = null;
 
-  socket.on("start-stream", (streamKey) => {
+  socket.on("start-stream", ({ destination, streamKey }) => {
+    const rtmpUrl =
+      destination === "youtube"
+        ? `rtmp://a.rtmp.youtube.com/live2/${streamKey}`
+        : `rtmp://rtmp-server:1935/hls/${streamKey}`;
+
     const options = [
       "-i",
       "-",
@@ -52,7 +57,7 @@ io.on("connection", (socket) => {
       "44100",
       "-f",
       "flv",
-      `rtmp://a.rtmp.youtube.com/live2/${streamKey}`,
+      rtmpUrl,
     ];
 
     ffmpegProcess = spawn("ffmpeg", options);
