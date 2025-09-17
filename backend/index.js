@@ -1,7 +1,12 @@
 import http from "http";
 import express from "express";
+import dotenv from "dotenv";
+import cookieParser from "cookie-parser";
+import cors from "cors";
 import { Server } from "socket.io";
 import { spawn } from "child_process";
+import authRoutes from "./src/routes/auth.route.js";
+import { connectDB } from "./src/lib/db.js";
 
 const app = express();
 const server = http.createServer(app);
@@ -10,6 +15,8 @@ const io = new Server(server, {
     origin: "*",
   },
 });
+
+dotenv.config();
 
 const PORT = 3000;
 
@@ -103,6 +110,18 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => stopFFmpeg("disconnect"));
 });
 
+app.use(express.json());
+app.use(cookieParser());
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  })
+);
+
+app.use("/api/auth", authRoutes);
+
 server.listen(PORT, () => {
   console.log(`Server started at PORT: ${PORT}`);
+  connectDB();
 });
