@@ -11,7 +11,7 @@ const StreamYt = () => {
   const [streamKey, setStreamKey] = useState("");
 
   useEffect(() => {
-    const socket = io("http://localhost:3000");
+    const socket = io(import.meta.env.VITE_SOCKET_URL);
     socketRef.current = socket;
 
     socket.on("connect", () => {

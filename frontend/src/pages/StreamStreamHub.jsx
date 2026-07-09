@@ -13,7 +13,7 @@ const StreamStreamHub = () => {
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    socketRef.current = io("http://localhost:3000");
+    socketRef.current = io(import.meta.env.VITE_SOCKET_URL);
 
     socketRef.current.on("connect", () => {
       console.log("Connected to backend");
@@ -71,7 +71,9 @@ const StreamStreamHub = () => {
 
     mediaRecorder.start(100);
 
-    setWatchLink(`http://localhost:5173/watchstream/${streamName}`);
+    setWatchLink(
+      `${import.meta.env.VITE_APP_URL}/watchstream/${streamName}`
+    );
   };
 
   const handleStop = () => {

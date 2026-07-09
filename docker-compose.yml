@@ -6,7 +6,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     volumes:
-      - ./backend:/home/app
+      - ./backend:/home/app:Z
     ports:
       - "3000:3000"
     restart: unless-stopped
@@ -22,7 +22,7 @@ services:
       - "1935:1935"
       - "8080:80"
     volumes:
-      - ./hls-data:/opt/data/hls
+      - ./hls-data:/opt/data/hls:Z
     restart: unless-stopped
     networks:
       - streamhub-net

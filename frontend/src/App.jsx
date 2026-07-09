@@ -9,7 +9,7 @@ import { useEffect } from "react";
 import Home from "./pages/Home";
 import StreamStreamHub from "./pages/StreamStreamHub";
 import WatchStream from "./pages/WatchStream";
-import StreamYt from "./pages/Streamyt";
+import StreamYt from "./pages/StreamYt";
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
 import Landing from "./pages/Landing";

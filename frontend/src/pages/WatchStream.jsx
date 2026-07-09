@@ -11,7 +11,7 @@ const WatchStream = () => {
 
   useEffect(() => {
     const video = videoRef.current;
-    const streamUrl = `http://localhost:8080/hls/${streamName}/index.m3u8`;
+    const streamUrl = `${import.meta.env.VITE_HLS_URL}/hls/${streamName}/index.m3u8`;
 
     if (Hls.isSupported()) {
       const hls = new Hls();
