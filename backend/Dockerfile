@@ -1,10 +1,8 @@
-# Use Ubuntu 20.04 as base
 FROM ubuntu:focal
 
-# Install curl and add Node.js 18 from Nodesource, then install Node.js + FFmpeg
 RUN apt-get update && \
     apt-get install -y curl && \
-    curl -sL https://deb.nodesource.com/setup_18.x | bash - && \
+    curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
     apt-get update && \
     apt-get install -y nodejs ffmpeg && \
     apt-get clean && \
@@ -14,12 +12,14 @@ WORKDIR /home/app
 
 RUN npm install -g nodemon
 
-COPY package*.json ./
+COPY backend/package*.json ./
 
 RUN npm install
 
-COPY . .
+COPY backend/ .
+
+COPY frontend/dist ./frontend/dist
 
 EXPOSE 3000
 
-CMD ["nodemon", "index.js"]
+CMD ["npm", "start"]

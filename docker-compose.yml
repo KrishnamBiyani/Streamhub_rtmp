@@ -3,10 +3,10 @@ version: "3.8"
 services:
   backend:
     build:
-      context: ./backend
-      dockerfile: Dockerfile
-    volumes:
-      - ./backend:/home/app:Z
+      context: .
+      dockerfile: ./backend/Dockerfile
+    env_file:
+      - ./backend/.env
     ports:
       - "3000:3000"
     restart: unless-stopped
