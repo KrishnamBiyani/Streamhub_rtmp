@@ -14,4 +14,13 @@ export default [
       ...js.configs.recommended.rules,
     },
   },
+  {
+    files: ["test/**/*.js"],
+    languageOptions: {
+      globals: {
+        ...globals.node,
+        ...globals.jest,
+      },
+    },
+  },
 ];
