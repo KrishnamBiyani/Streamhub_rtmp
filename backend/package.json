@@ -5,7 +5,10 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "nodemon index.js"
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "lint": "eslint . --max-warnings=0",
+    "test": "node --test"
   },
   "keywords": [],
   "author": "",
@@ -22,6 +25,9 @@
     "socket.io": "^4.8.1"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.8.0",
+    "globals": "^17.8.0",
     "nodemon": "^3.1.10"
   }
 }
