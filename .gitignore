@@ -25,5 +25,11 @@ dist-ssr
 
 
 .env
-backend/.env
-frontend/.env
+
+# Backend env files
+backend/.env*
+!backend/.env.example
+
+# Frontend env files
+frontend/.env*
+!frontend/.env.example

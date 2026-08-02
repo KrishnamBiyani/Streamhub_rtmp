@@ -1,5 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
+import { Radio, Check, Copy } from "lucide-react";
+import toast from "react-hot-toast";
+import Button from "../components/ui/Button";
+import Input from "../components/ui/Input";
+import Card from "../components/ui/Card";
 
 const StreamStreamHub = () => {
   const videoRef = useRef(null);
@@ -31,6 +36,7 @@ const StreamStreamHub = () => {
         }
       } catch (err) {
         console.error("Failed to access camera/mic:", err);
+        toast.error("Camera/microphone access is required to stream");
       }
     }
 
@@ -44,13 +50,18 @@ const StreamStreamHub = () => {
 
   const handleStart = () => {
     if (!streamName.trim()) {
-      alert("Please enter a stream name");
+      toast.error("Please enter a stream name");
+      return;
+    }
+
+    const stream = streamRef.current;
+    if (!stream) {
+      toast.error("Camera/microphone access is required to stream");
       return;
     }
 
     setIsStreaming(true);
     const socket = socketRef.current;
-    const stream = streamRef.current;
 
     socket.emit("start-stream", {
       destination: "rtmp",
@@ -98,75 +109,109 @@ const StreamStreamHub = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black text-white p-6 flex flex-col items-center gap-6">
-      <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">
-        🟣 Stream on StreamHub
-      </h1>
+    <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col">
+      <header className="shrink-0 flex items-center gap-2 px-4 sm:px-6 py-3.5 sm:py-4 border-b border-zinc-800">
+        <Radio className="h-6 w-6 text-indigo-400" aria-hidden="true" />
+        <h1 className="text-lg sm:text-xl font-semibold text-zinc-50">
+          Stream on StreamHub
+        </h1>
+      </header>
 
-      <div className="w-full max-w-3xl aspect-[16/8] bg-gray-900 rounded-xl overflow-hidden border border-gray-800 shadow-lg">
-        <video
-          ref={videoRef}
-          autoPlay
-          muted
-          playsInline
-          className="w-full h-full object-cover"
-        />
-      </div>
-
-      <input
-        type="text"
-        placeholder="Enter a Stream Name"
-        className="bg-gray-800 border border-gray-700 rounded px-4 py-3 w-full max-w-xl text-white placeholder-white/60"
-        value={streamName}
-        onChange={(e) => setStreamName(e.target.value)}
-        disabled={isStreaming}
-      />
-
-      {watchLink && (
-        <div className="w-full max-w-xl bg-gray-800 border border-gray-700 rounded px-4 py-3 shadow-md">
-          <p className="text-sm text-gray-400 mb-2">🔗 Watch Link:</p>
-          <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-            <input
-              type="text"
-              readOnly
-              value={watchLink}
-              className="w-full bg-gray-900 text-blue-400 font-mono px-3 py-2 rounded outline-none cursor-text text-sm"
-              onClick={(e) => e.target.select()}
-            />
-            <button
-              onClick={handleCopy}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-semibold transition cursor-pointer"
+      <main className="flex-1 w-full max-w-6xl mx-auto px-4 sm:px-6 py-4 sm:py-6 flex flex-col lg:flex-row gap-4 sm:gap-6">
+        <div className="w-full lg:flex-1 lg:min-w-0">
+          <Card className="relative w-full aspect-video overflow-hidden">
+            <video
+              ref={videoRef}
+              autoPlay
+              muted
+              playsInline
+              className="w-full h-full object-cover rounded-xl"
             >
-              {copied ? "✅ Copied!" : "📋 Copy"}
-            </button>
-          </div>
-        </div>
-      )}
+              <track kind="captions" />
+            </video>
 
-      <div className="flex gap-4">
-        <button
-          onClick={handleStart}
-          disabled={isStreaming}
-          className={`px-6 py-3 rounded text-lg font-semibold transition cursor-pointer ${
-            isStreaming
-              ? "bg-green-800 cursor-not-allowed"
-              : "bg-green-600 hover:bg-green-700"
-          }`}
-        >
-          ▶️ Start Stream
-        </button>
-        <button
-          onClick={handleStop}
-          disabled={!isStreaming}
-          className={`px-6 py-3 rounded text-lg font-semibold transition cursor-pointer ${
-            !isStreaming
-              ? "bg-red-800 cursor-not-allowed"
-              : "bg-red-600 hover:bg-red-700"
-          }`}
-        >
-          ⏹️ Stop Stream
-        </button>
-      </div>
+            {isStreaming && (
+              <div
+                role="status"
+                className="absolute top-3 left-3 flex items-center gap-1.5 rounded-full bg-red-600/90 px-2.5 py-1 text-xs font-semibold text-white"
+              >
+                <span
+                  className="h-1.5 w-1.5 rounded-full bg-white animate-pulse"
+                  aria-hidden="true"
+                />
+                LIVE
+              </div>
+            )}
+          </Card>
+        </div>
+
+        <div className="w-full lg:w-80 xl:w-96 lg:shrink-0 flex flex-col gap-4">
+          <Card className="p-4 sm:p-5 flex flex-col gap-4">
+            <Input
+              label="Stream name"
+              id="streamhub-stream-name"
+              type="text"
+              placeholder="Enter a stream name"
+              value={streamName}
+              onChange={(e) => setStreamName(e.target.value)}
+              disabled={isStreaming}
+            />
+
+            <div className="flex flex-col sm:flex-row lg:flex-col gap-3">
+              <Button
+                variant="success"
+                onClick={handleStart}
+                disabled={isStreaming}
+                className="w-full sm:w-auto lg:w-full"
+              >
+                Start stream
+              </Button>
+              <Button
+                variant="danger"
+                onClick={handleStop}
+                disabled={!isStreaming}
+                className="w-full sm:w-auto lg:w-full"
+              >
+                Stop stream
+              </Button>
+            </div>
+          </Card>
+
+          {watchLink && (
+            <Card className="p-4 sm:p-5">
+              <p className="text-sm text-zinc-400 mb-2">Watch link</p>
+              <div className="flex flex-col sm:flex-row lg:flex-col sm:items-center lg:items-stretch gap-2">
+                <label htmlFor="watch-link" className="sr-only">
+                  Watch link
+                </label>
+                <input
+                  id="watch-link"
+                  type="text"
+                  readOnly
+                  value={watchLink}
+                  className="w-full min-w-0 bg-zinc-950 border border-zinc-800 text-indigo-400 font-mono px-3 py-2 rounded-md outline-none cursor-text text-sm focus-visible:ring-2 focus-visible:ring-indigo-400"
+                  onClick={(e) => e.target.select()}
+                />
+                <Button
+                  variant="secondary"
+                  onClick={handleCopy}
+                  className="shrink-0 w-full sm:w-auto lg:w-full"
+                >
+                  {copied ? (
+                    <>
+                      <Check className="h-4 w-4" aria-hidden="true" /> Copied
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="h-4 w-4" aria-hidden="true" /> Copy
+                    </>
+                  )}
+                </Button>
+              </div>
+            </Card>
+          )}
+        </div>
+      </main>
     </div>
   );
 };

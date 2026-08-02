@@ -1,9 +1,11 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useAuthStore } from "../store/useAuthStore";
-import { Eye, EyeOff, Loader2, Lock, Mail, User } from "lucide-react";
+import { Eye, EyeOff, Lock, Mail, User } from "lucide-react";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
-// import samurai from "../assets/samurai.png";
+import Button from "../components/ui/Button";
+import Input from "../components/ui/Input";
+import Card from "../components/ui/Card";
 
 const SignUp = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -16,153 +18,119 @@ const SignUp = () => {
   const { signup, isSigningUp } = useAuthStore();
 
   const validateForm = () => {
-    if (!formData.fullName.trim()) return toast.error("Full name is required");
-    if (!formData.email.trim()) return toast.error("Email is required");
-    if (!/\S+@\S+\.\S+/.test(formData.email))
-      return toast.error("Invalid email format");
-    if (!formData.password) return toast.error("Password is required");
-    if (formData.password.length < 6)
-      return toast.error("Password must be at least 6 characters");
+    if (!formData.fullName.trim()) {
+      toast.error("Full name is required");
+      return false;
+    }
+    if (!formData.email.trim()) {
+      toast.error("Email is required");
+      return false;
+    }
+    if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      toast.error("Invalid email format");
+      return false;
+    }
+    if (!formData.password) {
+      toast.error("Password is required");
+      return false;
+    }
+    if (formData.password.length < 6) {
+      toast.error("Password must be at least 6 characters");
+      return false;
+    }
     return true;
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const success = validateForm();
-    if (success === true) signup(formData);
+    if (validateForm()) signup(formData);
   };
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-black text-white">
-      {/* Left Side - Form */}
-      <div className="flex flex-1 items-center justify-center p-8">
-        <div className="w-full max-w-md">
-          <h2 className="text-4xl md:text-5xl font-serif font-bold mb-8 text-center text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-violet-500">
-            Create your Account
-          </h2>
+    <div className="min-h-screen flex items-center justify-center bg-zinc-950 text-zinc-100 px-4 py-12">
+      <div className="w-full max-w-md">
+        <h1 className="mb-2 text-center text-2xl font-semibold text-zinc-50">
+          Create your account
+        </h1>
+        <p className="mb-8 text-center text-sm text-zinc-400">
+          Start streaming to YouTube or StreamHub in minutes.
+        </p>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Full Name */}
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text font-medium text-white">
-                  Full Name
-                </span>
-              </label>
-              <div className="relative border rounded-md">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <User className="size-5 text-white/60" />
-                </div>
-                <input
-                  type="text"
-                  className="input input-bordered w-full pl-10 h-14 text-lg bg-black text-white placeholder-white/70 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="John Doe"
-                  value={formData.fullName}
-                  onChange={(e) =>
-                    setFormData({ ...formData, fullName: e.target.value })
-                  }
-                  required
-                />
-              </div>
-            </div>
+        <Card className="p-6 sm:p-8">
+          <form onSubmit={handleSubmit} className="space-y-5" noValidate>
+            <Input
+              label="Full name"
+              id="signup-fullname"
+              type="text"
+              icon={User}
+              placeholder="John Doe"
+              autoComplete="name"
+              value={formData.fullName}
+              onChange={(e) =>
+                setFormData({ ...formData, fullName: e.target.value })
+              }
+              required
+            />
 
-            {/* Email */}
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text font-medium text-white">Email</span>
-              </label>
-              <div className="relative border rounded-md">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail className="size-5 text-white/60" />
-                </div>
-                <input
-                  type="email"
-                  className="input input-bordered w-full pl-10 h-14 text-lg bg-black text-white placeholder-white/70 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="you@example.com"
-                  value={formData.email}
-                  onChange={(e) =>
-                    setFormData({ ...formData, email: e.target.value })
-                  }
-                  required
-                />
-              </div>
-            </div>
+            <Input
+              label="Email"
+              id="signup-email"
+              type="email"
+              icon={Mail}
+              placeholder="you@example.com"
+              autoComplete="email"
+              value={formData.email}
+              onChange={(e) =>
+                setFormData({ ...formData, email: e.target.value })
+              }
+              required
+            />
 
-            {/* Password */}
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text font-medium text-white">
-                  Password
-                </span>
-              </label>
-              <div className="relative border rounded-md">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="size-5 text-white/60" />
-                </div>
-                <input
-                  type={showPassword ? "text" : "password"}
-                  className="input input-bordered w-full pl-10 pr-10 h-14 text-lg bg-black text-white placeholder-white/70 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="••••••••"
-                  value={formData.password}
-                  onChange={(e) =>
-                    setFormData({ ...formData, password: e.target.value })
-                  }
-                  required
-                />
+            <Input
+              label="Password"
+              id="signup-password"
+              type={showPassword ? "text" : "password"}
+              icon={Lock}
+              placeholder="••••••••"
+              autoComplete="new-password"
+              value={formData.password}
+              onChange={(e) =>
+                setFormData({ ...formData, password: e.target.value })
+              }
+              required
+              rightElement={
                 <button
                   type="button"
-                  className="cursor-pointer absolute inset-y-0 right-0 pr-3 flex items-center text-white/60"
-                  onClick={() => setShowPassword(!showPassword)}
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  className="p-2 -m-2 text-zinc-500 hover:text-zinc-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 rounded"
                   aria-label={showPassword ? "Hide password" : "Show password"}
+                  aria-pressed={showPassword}
                 >
-                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  {showPassword ? (
+                    <EyeOff size={18} aria-hidden="true" />
+                  ) : (
+                    <Eye size={18} aria-hidden="true" />
+                  )}
                 </button>
-              </div>
-            </div>
+              }
+            />
 
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={isSigningUp}
-              className={`btn w-full border border-white rounded-md font-serif font-semibold h-14 text-lg transition duration-300 cursor-pointer ${
-                isSigningUp
-                  ? "bg-gray-700 cursor-not-allowed"
-                  : "hover:bg-white hover:text-black"
-              }`}
-            >
-              {isSigningUp ? (
-                <div className="flex items-center justify-center space-x-2">
-                  <Loader2 className="animate-spin" size={20} />
-                  <span>Loading...</span>
-                </div>
-              ) : (
-                "Create Account"
-              )}
-            </button>
+            <Button type="submit" loading={isSigningUp} className="w-full">
+              {isSigningUp ? "Creating account..." : "Create account"}
+            </Button>
           </form>
+        </Card>
 
-          <p className="mt-6 text-center text-white/70 text-lg">
-            Already have an account?{" "}
-            <Link
-              to="/signin"
-              className="text-blue-400 font-semibold hover:text-blue-500 transition-colors duration-200"
-            >
-              Sign In
-            </Link>
-          </p>
-        </div>
+        <p className="mt-6 text-center text-sm text-zinc-400">
+          Already have an account?{" "}
+          <Link
+            to="/signin"
+            className="font-medium text-indigo-400 hover:text-indigo-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 rounded"
+          >
+            Sign in
+          </Link>
+        </p>
       </div>
-
-      {/* Right Side - Samurai Image (optional) */}
-      {/* <div className="relative hidden md:flex flex-1 items-center justify-center bg-gray-900">
-        <img
-          src={samurai}
-          alt="Samurai"
-          className="absolute bottom-0 max-h-[100vh] select-none rotate-y-180"
-          draggable={false}
-          style={{ userSelect: "none" }}
-        />
-      </div> */}
     </div>
   );
 };

@@ -1,55 +1,71 @@
 import { Link, useNavigate } from "react-router-dom";
+import { Radio, Youtube } from "lucide-react";
 import { useAuthStore } from "../store/useAuthStore";
+import Button from "../components/ui/Button";
+import Card from "../components/ui/Card";
 
 const Home = () => {
-  const { logout } = useAuthStore();
+  const { logout, isLoggingOut } = useAuthStore();
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     navigate("/signin");
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black text-white px-6 py-4 flex flex-col">
-      {/* Header */}
-      <header className="w-full flex justify-between items-center px-4 py-3 border-b border-gray-800">
-        <h2 className="text-xl font-bold tracking-wide text-purple-400 font-serif">
+    <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col">
+      <header className="w-full flex justify-between items-center px-6 py-4 border-b border-zinc-800">
+        <h2 className="text-lg font-semibold tracking-tight text-zinc-50">
           StreamHub
         </h2>
-        <button
+        <Button
+          variant="secondary"
           onClick={handleLogout}
-          className="bg-gray-800 hover:bg-gray-700 text-sm px-4 py-2 rounded shadow-sm transition duration-200 cursor-pointer"
+          loading={isLoggingOut}
         >
-          Logout
-        </button>
+          {isLoggingOut ? "Logging out..." : "Logout"}
+        </Button>
       </header>
 
-      {/* Main Section */}
-      <main className="flex flex-col items-center justify-center flex-grow text-center">
-        <h1 className="text-5xl md:text-6xl font-extrabold mb-6 tracking-tight font-serif">
-          Welcome to{" "}
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-500">
-            StreamHub
-          </span>
+      <main className="flex flex-col items-center justify-center flex-grow text-center px-6 py-16">
+        <h1 className="text-4xl md:text-5xl font-semibold mb-4 tracking-tight text-zinc-50">
+          Welcome to StreamHub
         </h1>
-        <p className="text-lg text-gray-400 mb-10 max-w-xl">
+        <p className="text-base text-zinc-400 mb-10 max-w-xl">
           Stream directly from your browser to YouTube or host your own live
           stream with just a few clicks.
         </p>
 
-        <div className="flex gap-6 flex-wrap justify-center">
-          <Link
-            to="/stream/youtube"
-            className="bg-red-600 hover:bg-red-700 px-6 py-3 rounded text-lg font-medium shadow-lg transition duration-200"
-          >
-            🔴 Stream to YouTube
+        <div className="grid gap-4 sm:grid-cols-2 w-full max-w-2xl">
+          <Link to="/stream/youtube" className="group">
+            <Card className="p-6 text-left h-full transition-colors duration-150 group-hover:border-indigo-500/60 group-focus-visible:border-indigo-500/60 group-focus-visible:ring-2 group-focus-visible:ring-indigo-400">
+              <Youtube
+                className="h-6 w-6 text-red-400 mb-3"
+                aria-hidden="true"
+              />
+              <h3 className="text-base font-medium text-zinc-50 mb-1">
+                Stream to YouTube
+              </h3>
+              <p className="text-sm text-zinc-400">
+                Go live on YouTube using your stream key.
+              </p>
+            </Card>
           </Link>
-          <Link
-            to="/stream/StreamHub"
-            className="bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded text-lg font-medium shadow-lg transition duration-200"
-          >
-            🟣 Stream on StreamHub
+
+          <Link to="/stream/StreamHub" className="group">
+            <Card className="p-6 text-left h-full transition-colors duration-150 group-hover:border-indigo-500/60 group-focus-visible:border-indigo-500/60 group-focus-visible:ring-2 group-focus-visible:ring-indigo-400">
+              <Radio
+                className="h-6 w-6 text-indigo-400 mb-3"
+                aria-hidden="true"
+              />
+              <h3 className="text-base font-medium text-zinc-50 mb-1">
+                Stream on StreamHub
+              </h3>
+              <p className="text-sm text-zinc-400">
+                Host your own live stream and share the link.
+              </p>
+            </Card>
           </Link>
         </div>
       </main>

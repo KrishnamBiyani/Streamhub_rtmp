@@ -25,7 +25,7 @@ io.on("connection", (socket) => {
     const rtmpUrl =
       destination === "youtube"
         ? `rtmp://a.rtmp.youtube.com/live2/${streamKey}`
-        : `rtmp://rtmp-server:1935/hls/${streamKey}`;
+        : `${process.env.RTMP_SERVER_URL}/hls/${streamKey}`;
 
     const options = [
       "-i",
@@ -64,6 +64,10 @@ io.on("connection", (socket) => {
     ];
 
     ffmpegProcess = spawn("ffmpeg", options);
+
+    ffmpegProcess.stdin.on("error", (err) => {
+      console.error("FFmpeg stdin error:", err.message);
+    });
 
     ffmpegProcess.stderr.on("data", (data) => {
       console.error(`[ffmpeg stderr]: ${data}`);

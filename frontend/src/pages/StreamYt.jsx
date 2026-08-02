@@ -1,5 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
+import { Youtube } from "lucide-react";
+import toast from "react-hot-toast";
+import Button from "../components/ui/Button";
+import Input from "../components/ui/Input";
+import Card from "../components/ui/Card";
 
 const StreamYt = () => {
   const videoRef = useRef(null);
@@ -34,6 +39,7 @@ const StreamYt = () => {
         }
       } catch (err) {
         console.error("Failed to access camera/mic:", err);
+        toast.error("Camera/microphone access is required to stream");
       }
     };
 
@@ -50,7 +56,7 @@ const StreamYt = () => {
 
   const handleStart = () => {
     if (!streamKey.trim()) {
-      alert("Please enter a valid YouTube stream key.");
+      toast.error("Please enter a valid YouTube stream key");
       return;
     }
 
@@ -58,6 +64,11 @@ const StreamYt = () => {
 
     const socket = socketRef.current;
     const stream = streamRef.current;
+
+    if (!stream) {
+      toast.error("Camera/microphone access is required to stream");
+      return;
+    }
 
     socket.emit("start-stream", {
       destination: "youtube",
@@ -98,54 +109,75 @@ const StreamYt = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black text-white p-6 flex flex-col items-center gap-6">
-      <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-yellow-400">
-        🎥 Stream to YouTube
-      </h1>
+    <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col">
+      <header className="shrink-0 flex items-center gap-2 px-4 sm:px-6 py-3.5 sm:py-4 border-b border-zinc-800">
+        <Youtube className="h-6 w-6 text-red-500" aria-hidden="true" />
+        <h1 className="text-lg sm:text-xl font-semibold text-zinc-50">
+          Stream to YouTube
+        </h1>
+      </header>
 
-      <div className="w-full max-w-3xl aspect-[16/8] bg-gray-900 rounded-xl overflow-hidden shadow-lg border border-gray-800">
-        <video
-          ref={videoRef}
-          autoPlay
-          muted
-          playsInline
-          className="w-full h-full object-cover"
-        />
-      </div>
+      <main className="flex-1 w-full max-w-6xl mx-auto px-4 sm:px-6 py-4 sm:py-6 flex flex-col lg:flex-row gap-4 sm:gap-6">
+        <div className="w-full lg:flex-1 lg:min-w-0">
+          <Card className="relative w-full aspect-video overflow-hidden">
+            <video
+              ref={videoRef}
+              autoPlay
+              muted
+              playsInline
+              className="w-full h-full object-cover rounded-xl"
+            >
+              <track kind="captions" />
+            </video>
 
-      <input
-        type="text"
-        placeholder="Enter YouTube Stream Key"
-        className="bg-gray-800 border border-gray-700 rounded px-4 py-3 w-full max-w-xl text-white placeholder-white/60"
-        value={streamKey}
-        onChange={(e) => setStreamKey(e.target.value)}
-        disabled={isStreaming}
-      />
+            {isStreaming && (
+              <div
+                role="status"
+                className="absolute top-3 left-3 flex items-center gap-1.5 rounded-full bg-red-600/90 px-2.5 py-1 text-xs font-semibold text-white"
+              >
+                <span
+                  className="h-1.5 w-1.5 rounded-full bg-white animate-pulse"
+                  aria-hidden="true"
+                />
+                LIVE
+              </div>
+            )}
+          </Card>
+        </div>
 
-      <div className="flex gap-4 mt-4">
-        <button
-          onClick={handleStart}
-          disabled={isStreaming}
-          className={`px-6 py-3 rounded text-lg font-semibold transition cursor-pointer ${
-            isStreaming
-              ? "bg-green-800 cursor-not-allowed"
-              : "bg-green-600 hover:bg-green-700"
-          }`}
-        >
-          ▶️ Start Stream
-        </button>
-        <button
-          onClick={handleStop}
-          disabled={!isStreaming}
-          className={`px-6 py-3 rounded text-lg font-semibold transition cursor-pointer ${
-            !isStreaming
-              ? "bg-red-800 cursor-not-allowed"
-              : "bg-red-600 hover:bg-red-700"
-          }`}
-        >
-          ⏹️ Stop Stream
-        </button>
-      </div>
+        <div className="w-full lg:w-80 xl:w-96 lg:shrink-0">
+          <Card className="p-4 sm:p-5 flex flex-col gap-4">
+            <Input
+              label="YouTube stream key"
+              id="youtube-stream-key"
+              type="text"
+              placeholder="Enter YouTube stream key"
+              value={streamKey}
+              onChange={(e) => setStreamKey(e.target.value)}
+              disabled={isStreaming}
+            />
+
+            <div className="flex flex-col sm:flex-row lg:flex-col gap-3">
+              <Button
+                variant="success"
+                onClick={handleStart}
+                disabled={isStreaming}
+                className="w-full sm:w-auto lg:w-full"
+              >
+                Start stream
+              </Button>
+              <Button
+                variant="danger"
+                onClick={handleStop}
+                disabled={!isStreaming}
+                className="w-full sm:w-auto lg:w-full"
+              >
+                Stop stream
+              </Button>
+            </div>
+          </Card>
+        </div>
+      </main>
     </div>
   );
 };

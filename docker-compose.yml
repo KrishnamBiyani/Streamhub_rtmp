@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: ./backend/Dockerfile
     env_file:
-      - ./backend/.env
+      - ./backend/.env.production
     ports:
       - "3000:3000"
     restart: unless-stopped

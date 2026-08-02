@@ -1,30 +1,30 @@
 import { useNavigate } from "react-router-dom";
+import { Radio } from "lucide-react";
+import Button from "../components/ui/Button";
+import { useAuthStore } from "../store/useAuthStore";
 
 const Landing = () => {
   const navigate = useNavigate();
+  const { authUser } = useAuthStore();
 
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center px-4">
-      {/* Hero Section */}
-      <h1 className="text-4xl sm:text-6xl font-extrabold text-center mb-6 leading-tight">
-        <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">
-          Stream Instantly <br /> to the World
-        </span>{" "}
-        <span>🌍</span>
+    <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col items-center justify-center px-4">
+      <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-600/10 text-indigo-400">
+        <Radio className="h-7 w-7" aria-hidden="true" />
+      </div>
+
+      <h1 className="text-4xl sm:text-5xl font-semibold text-center mb-4 leading-tight text-zinc-50">
+        Stream instantly to the world
       </h1>
 
-      <p className="text-lg sm:text-xl text-gray-300 text-center mb-10 max-w-xl">
-        Go live instantly from your browser. Stream to YouTube or share a custom
-        link with your audience — no setup needed.
+      <p className="text-base sm:text-lg text-zinc-400 text-center mb-10 max-w-xl">
+        Go live straight from your browser. Stream to YouTube or share a
+        custom link with your audience — no setup needed.
       </p>
 
-      {/* Call to Action */}
-      <button
-        onClick={() => navigate("/signup")}
-        className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-full text-lg transition-all duration-200 cursor-pointer"
-      >
-        Let’s Stream 🚀
-      </button>
+      <Button onClick={() => navigate(authUser ? "/home" : "/signup")}>
+        Get started
+      </Button>
     </div>
   );
 };

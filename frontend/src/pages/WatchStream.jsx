@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import Hls from "hls.js";
 import { useParams } from "react-router-dom";
+import { Loader2 } from "lucide-react";
+import Card from "../components/ui/Card";
 
 const WatchStream = () => {
   const { streamName } = useParams();
@@ -40,17 +42,24 @@ const WatchStream = () => {
   }, [streamName]);
 
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-6">
-      <h2 className="text-2xl font-semibold text-purple-400 mb-4">
-        🎬 Watching: <span className="text-white">{streamName}</span>
-      </h2>
+    <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col items-center justify-center p-6">
+      <h1 className="max-w-full break-words text-center text-xl font-semibold text-zinc-50 mb-4">
+        Watching: <span className="text-indigo-400">{streamName}</span>
+      </h1>
 
-      <div className="w-full max-w-5xl aspect-video bg-gray-800 rounded-lg shadow-lg flex items-center justify-center relative">
+      <Card className="w-full max-w-5xl aspect-video flex items-center justify-center relative overflow-hidden">
         {loading && !error && (
-          <p className="text-white/70 animate-pulse">Loading stream...</p>
+          <p className="flex items-center gap-2 text-zinc-400">
+            <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+            Loading stream...
+          </p>
         )}
 
-        {error && <p className="text-red-400 font-medium">{error}</p>}
+        {error && (
+          <p role="alert" className="text-red-400 font-medium px-4 text-center">
+            {error}
+          </p>
+        )}
 
         {!error && (
           <video
@@ -58,10 +67,12 @@ const WatchStream = () => {
             controls
             autoPlay
             playsInline
-            className="absolute top-0 left-0 w-full h-full rounded-lg object-cover"
-          />
+            className="absolute top-0 left-0 w-full h-full rounded-xl object-cover"
+          >
+            <track kind="captions" />
+          </video>
         )}
-      </div>
+      </Card>
     </div>
   );
 };
