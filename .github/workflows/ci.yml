@@ -76,9 +76,10 @@ jobs:
       - name: Build
         run: npm run build
 
-  deploy:
-    name: Deploy
+  publish:
+    name: Publish images
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     needs:
       - backend
@@ -86,25 +87,96 @@ jobs:
 
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
+    permissions:
+      contents: read
+      packages: write
+
     steps:
-      - name: Deploy to EC2
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Build frontend
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run build
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+
+      - name: Build and push backend image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./backend/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/krishnambiyani/streamhub-backend:latest
+            ghcr.io/krishnambiyani/streamhub-backend:${{ github.sha }}
+
+      - name: Build and push RTMP server image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./rtmp_server
+          file: ./rtmp_server/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/krishnambiyani/streamhub-rtmp-server:latest
+            ghcr.io/krishnambiyani/streamhub-rtmp-server:${{ github.sha }}
+
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+
+    needs:
+      - publish
+
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Copy deployment files to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: ${{ secrets.EC2_PORT }}
+          source: "docker-compose.yml,deploy.sh"
+          target: "~/Streamhub_rtmp"
+
+      - name: Pull images and restart containers
         uses: appleboy/ssh-action@v1.2.2
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           port: ${{ secrets.EC2_PORT }}
+          envs: GHCR_PULL_TOKEN,GHCR_PULL_USER
           script: |
-            set -e
-
             cd ~/Streamhub_rtmp
-
-            git pull origin main
-
-            cd frontend
-            npm ci
-            npm run build
-
-            cd ..
-
-            docker compose up --build -d
+            chmod +x deploy.sh
+            ./deploy.sh
+        env:
+          GHCR_PULL_TOKEN: ${{ secrets.GHCR_PULL_TOKEN }}
+          GHCR_PULL_USER: KrishnamBiyani

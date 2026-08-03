@@ -2,9 +2,7 @@ version: "3.8"
 
 services:
   backend:
-    build:
-      context: .
-      dockerfile: ./backend/Dockerfile
+    image: ghcr.io/krishnambiyani/streamhub-backend:latest
     env_file:
       - ./backend/.env.production
     ports:
@@ -14,9 +12,7 @@ services:
       - streamhub-net
 
   rtmp-server:
-    build:
-      context: ./rtmp_server
-      dockerfile: Dockerfile
+    image: ghcr.io/krishnambiyani/streamhub-rtmp-server:latest
     container_name: rtmp-server
     ports:
       - "1935:1935"
