@@ -74,6 +74,11 @@ jobs:
         run: npm run lint
 
       - name: Build
+        env:
+          VITE_API_URL: ${{ vars.VITE_API_URL }}
+          VITE_SOCKET_URL: ${{ vars.VITE_SOCKET_URL }}
+          VITE_HLS_URL: ${{ vars.VITE_HLS_URL }}
+          VITE_APP_URL: ${{ vars.VITE_APP_URL }}
         run: npm run build
 
   publish:
@@ -106,6 +111,11 @@ jobs:
 
       - name: Build frontend
         working-directory: frontend
+        env:
+          VITE_API_URL: ${{ vars.VITE_API_URL }}
+          VITE_SOCKET_URL: ${{ vars.VITE_SOCKET_URL }}
+          VITE_HLS_URL: ${{ vars.VITE_HLS_URL }}
+          VITE_APP_URL: ${{ vars.VITE_APP_URL }}
         run: |
           npm ci
           npm run build
